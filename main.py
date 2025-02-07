@@ -1,6 +1,7 @@
 import zipfile
 from zipfile import ZipFile
 import os
+import re
 
 # распаковываем архив
 with zipfile.ZipFile('hugo-export.zip', 'r') as zip_ref:
@@ -39,19 +40,30 @@ def remove_line_with_phrase(directory, phrase):
             lines = file.readlines()
             with open(filepath, 'w', encoding='utf-8') as file:
                 for line in lines:
+                    if line.startswith("date:"): # дата
+                        line = line[:16] + '\n'
+                    if "featured_image: " in line: # Вставляем "/wordpress/" 
+                        before_featured = line.split("featured_image: ")[0]
+                        after_featured = line.split("featured_image: ")[1]
+                        line = f"{before_featured}featured_image: /wordpress{after_featured}"
                     if phrase not in line:
                         file.write(line)
+                    
 
 # распаковка
 directory_path = 'hugo-export'
-convert_filename_encoding(directory_path)
+#convert_filename_encoding(directory_path)
 
 #удаление не нужных заметок
 words = ['Для внешней публикации']
 directory_posts = 'hugo-export/posts'
-remove_unnecessary(directory_posts)
+#remove_unnecessary(directory_posts)
 
-# Удаление катекгории Для внешней публикации
+# Удаление 
+# - категории Для внешней публикации
+# - обрезание даты (для удаления метки о последнем изменении)
+# Добавляем wordpress перед изображением в названии
+
 phrase_to_remove = "- Для внешней публикации"
 remove_line_with_phrase(directory_posts, phrase_to_remove)
 
