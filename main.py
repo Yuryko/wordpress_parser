@@ -40,12 +40,32 @@ def remove_line_with_phrase(directory, phrase):
             lines = file.readlines()
             with open(filepath, 'w', encoding='utf-8') as file:
                 for line in lines:
-                    if line.startswith("date:"): # дата
+
+                    # дата
+                    if line.startswith("date:"): 
                         line = line[:16] + '\n'
-                    if "featured_image: " in line: # Вставляем "/wordpress/" 
+
+                    # Вставляем "/wordpress/"
+                    if "featured_image: " in line: 
                         before_featured = line.split("featured_image: ")[0]
                         after_featured = line.split("featured_image: ")[1]
                         line = f"{before_featured}featured_image: /wordpress{after_featured}"
+
+                    # Вставляем нужное обрамление для картинок                              
+                    if "wp-image" in line: 
+                        after_featured1 = line.split("wp-image")[1]
+                        after_featured2 = line.split("/wp-content/uploads")[1]              
+                        after_featured3 = after_featured1[:5] + "](/wordpress/wp-content/uploads" + after_featured2
+                        after_featured4 = after_featured3.split("\" alt=")[0] + ')' + '\n'
+                        line = f"![wp-image{after_featured4}"
+                    #if "wp-image" in line: 
+                    #    before_featured2 = line[15:] + ']' # название картинки
+                    #    after_featured3 = line.split("qpos.cryptosoft.ru/news/")[1]
+                    #    line = f"{before_featured2}(/wordpress/{after_featured3}"
+
+                
+                    
+                    # Удаление категории
                     if phrase not in line:
                         file.write(line)
                     
@@ -54,7 +74,7 @@ def remove_line_with_phrase(directory, phrase):
 directory_path = 'hugo-export'
 #convert_filename_encoding(directory_path)
 
-#удаление не нужных заметок
+#удаление ненужных заметок (оставлю задел для фильтрации)
 words = ['Для внешней публикации']
 directory_posts = 'hugo-export/posts'
 #remove_unnecessary(directory_posts)
