@@ -32,11 +32,29 @@ def remove_unnecessary(root_dir):
         if not any(word in each_file_content for word in words):
             os.unlink(full_path)
 
+def remove_line_with_phrase(directory, phrase):
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        with open(filepath, 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+            with open(filepath, 'w', encoding='utf-8') as file:
+                for line in lines:
+                    if phrase not in line:
+                        file.write(line)
+
+# распаковка
 directory_path = 'hugo-export'
 convert_filename_encoding(directory_path)
 
+#удаление не нужных заметок
 words = ['Для внешней публикации']
 directory_posts = 'hugo-export/posts'
 remove_unnecessary(directory_posts)
+
+# Удаление катекгории Для внешней публикации
+phrase_to_remove = "- Для внешней публикации"
+remove_line_with_phrase(directory_posts, phrase_to_remove)
+
+
 
 
