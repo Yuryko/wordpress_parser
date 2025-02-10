@@ -1,3 +1,12 @@
+# ООО НТП "Криптософт"
+# скрипт формирует из экспорта wordpress файлы для генерации в hugo
+# - удаляются все посты кроме категории "Для внешней публикации"
+# - удаляется категрия "Для внешней публикации"
+# - преобразуются изображения, соотвествующие шаблону hugo (пока частично)
+
+
+
+
 import zipfile
 from zipfile import ZipFile
 import os
@@ -34,6 +43,15 @@ def remove_unnecessary(root_dir):
             os.unlink(full_path)
 
 def remove_line_with_phrase(directory, phrase):
+    
+#   для обработки картинок (на будущее)
+#   pattern1 = r'\[<img [^>]*wp-image-'
+#    replacement1 = r'![wp-image-'
+
+#    pattern2 = r'\[<img [^>]*wp-image-[^>]{4}'
+#    replacement2 = r'![wp-image-'
+
+    
     for filename in os.listdir(directory):
         filepath = os.path.join(directory, filename)
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -46,24 +64,22 @@ def remove_line_with_phrase(directory, phrase):
                         line = line[:16] + '\n'
 
                     # Вставляем "/wordpress/"
-                    if "featured_image: " in line: 
+                    if ("featured_image: " in line and "/wordpress" not in line):
                         before_featured = line.split("featured_image: ")[0]
                         after_featured = line.split("featured_image: ")[1]
                         line = f"{before_featured}featured_image: /wordpress{after_featured}"
 
                     # Вставляем нужное обрамление для картинок                              
-                    if "wp-image" in line: 
-                        after_featured1 = line.split("wp-image")[1]
-                        after_featured2 = line.split("/wp-content/uploads")[1]              
+                                                      
+                    #    line = re.sub(pattern1, replacement1, line)
+                    
+                    #этот код работает правильно, но обрезает все, что после первой картинки
+                    if "[<img" in line:
+                        after_featured1 = line.split(" wp-image")[1]
+                        after_featured2 = line.split("news/wp-content/uploads")[1]              
                         after_featured3 = after_featured1[:5] + "](/wordpress/wp-content/uploads" + after_featured2
-                        after_featured4 = after_featured3.split("\" alt=")[0] + ')' + '\n'
-                        line = f"![wp-image{after_featured4}"
-                    #if "wp-image" in line: 
-                    #    before_featured2 = line[15:] + ']' # название картинки
-                    #    after_featured3 = line.split("qpos.cryptosoft.ru/news/")[1]
-                    #    line = f"{before_featured2}(/wordpress/{after_featured3}"
-
-                
+                        after_featured5 = after_featured3.split("\" alt=")[0] + ')'
+                        line = f"![wp-image{after_featured5}"                      
                     
                     # Удаление категории
                     if phrase not in line:
