@@ -42,6 +42,7 @@ def remove_unnecessary(root_dir):
         if not any(word in each_file_content for word in words):
             os.unlink(full_path)
 
+# обработка постов
 def work_on_files(directory, phrase):
 # создание каталога для используемых изображений 
     if not os.path.exists('static'):
@@ -53,7 +54,7 @@ def work_on_files(directory, phrase):
     replacement_start = r'![wp-image-'
    
     pattern_png = r'png.*? />\]' # окончание стоки до png
-    replacement_png = r'png)'
+    replacement_png = r'png) '
 
     pattern_png_2 = r'(wp-image-.{4}).*?(/wp-content/uploads)'
     
@@ -65,7 +66,12 @@ def work_on_files(directory, phrase):
     replacement_feautured = r'thumbnail:\n  src: "/wordpress-test'
     pattern_png_3 = r'png'
     replacement_png_3 = r'png"\n  visibility:\n    -list'
- 
+# удаление ссылок на внвнутренние ресурсы
+    pattern_source = r'\[\d\]:'
+    pattern_source2 = r'\[\d\]'
+    pattern_source3 = r'(http://qpos.cryptosoft.ru).*?(.png)'
+
+
     for filename in os.listdir(directory):
         filepath = os.path.join(directory, filename)
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -100,12 +106,19 @@ def work_on_files(directory, phrase):
                                 os.makedirs(os.path.dirname(dest_image_path), exist_ok=True)
                         # Копируем изображение
                                 shutil.copy2(full_image_path, dest_image_path)
-                                print(f'Copied: {full_image_path} -> {dest_image_path}')
+                                #print(f'Copied: {full_image_path} -> {dest_image_path}')
                             else:
                                 print(f'File not found: {full_image_path}')
 
-                    
-                    # Удаление категории
+                    # Удаляем ссылки на ресурсы http://qpos.cryptosoft.ru  
+                    if "[" in line:
+                        line = re.sub(pattern_source, '', line)
+                        line = re.sub(pattern_source2, '', line)
+
+                    if "qpos.cryptosoft.ru" in line:
+                        line = re.sub(pattern_source3, '', line)
+
+                    # Удаляем категорию
                     if phrase not in line:
                         file.write(line)
 
