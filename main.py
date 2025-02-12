@@ -12,6 +12,7 @@ from zipfile import ZipFile
 import os
 import re
 import glob
+import shutil
 
 # распаковываем архив
 with zipfile.ZipFile('hugo-export.zip', 'r') as zip_ref:
@@ -44,7 +45,11 @@ def remove_unnecessary(root_dir):
             os.unlink(full_path)
 
 def work_on_files(directory, phrase):
+# создание каталога для используемых изображений 
+    if not os.path.exists('static'):
+        os.makedirs('static')
     
+    directory_wp_content = re.sub('/posts','', directory)
 # обработка изображений в тексте 
     pattern_start = r'\[<img [^>]*wp-image-' # заменим начало 
     replacement_start = r'![wp-image-'
@@ -62,8 +67,7 @@ def work_on_files(directory, phrase):
     replacement_feautured = r'thumbnail:\n  src: "/wordpress'
     pattern_png_3 = r'png'
     replacement_png_3 = r'png"\n  visibility:\n    -list'
-
-    
+ 
     for filename in os.listdir(directory):
         filepath = os.path.join(directory, filename)
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -89,6 +93,18 @@ def work_on_files(directory, phrase):
 
                     # копирование используемых изображений
                     if ".png" in line:
+                        image_paths = re.findall(r'/wp-content[^\s)]+\.(?:png|jpg)', line)
+                        for image_path in image_paths:
+                            full_image_path = os.path.join(directory_wp_content, image_path.lstrip('/'))
+                            if os.path.exists(full_image_path):
+                                relative_path = os.path.relpath(full_image_path, directory_wp_content)
+                                dest_image_path = os.path.join('static', relative_path)
+                                os.makedirs(os.path.dirname(dest_image_path), exist_ok=True)
+                        # Копируем изображение
+                                shutil.copy2(full_image_path, dest_image_path)
+                                print(f'Copied: {full_image_path} -> {dest_image_path}')
+                            else:
+                                print(f'File not found: {full_image_path}')
 
                     
                     # Удаление категории
