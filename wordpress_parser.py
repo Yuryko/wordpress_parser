@@ -15,7 +15,7 @@ import argparse
 parser=argparse.ArgumentParser(
     description=''' ООО НТП "Криптософт". Cкрипт формирует из экспорта wordpress файлы для генерации в hugo''',
     epilog=""" В результате работы скрипта будут сформированы два каталога 
-    posts  и  static. Переместите каталог posts  в каталог content, содержимое из static в каталог static
+    hugo/posts  и  static. Переместите каталог posts  в каталог content, содержимое из static в каталог static
     генератора сайтов HUGO.""")
 parser.add_argument('--d', type=str, default='wordpress', help='<каталог вебсервера>')
 args=parser.parse_args()
@@ -54,8 +54,8 @@ def remove_unnecessary(root_dir):
 # обработка постов
 def work_on_files(directory, phrase):
 # создание каталога для используемых изображений 
-    if not os.path.exists('static'):
-        os.makedirs('static')
+    if not os.path.exists('static/img'):
+        os.makedirs('static/img')
     
     directory_wp_content = re.sub('/posts','', directory)
 # обработка изображений в тексте 
@@ -111,7 +111,7 @@ def work_on_files(directory, phrase):
                             full_image_path = os.path.join(directory_wp_content, image_path.lstrip('/'))
                             if os.path.exists(full_image_path):
                                 relative_path = os.path.relpath(full_image_path, directory_wp_content)
-                                dest_image_path = os.path.join('static', relative_path)
+                                dest_image_path = os.path.join('static/img', relative_path)
                                 os.makedirs(os.path.dirname(dest_image_path), exist_ok=True)
                         # Копируем изображение
                                 shutil.copy2(full_image_path, dest_image_path)
@@ -154,7 +154,7 @@ remove_unnecessary(directory_posts)
 # - категории Для внешней публикации
 # - обрезание даты (для удаления метки о последнем изменении)
 # Обработка изображений
-# Копирование изображений в static
+# Копирование изображений в static/img
 
 phrase_to_remove = "- Для внешней публикации"
 work_on_files(directory_posts, phrase_to_remove)
