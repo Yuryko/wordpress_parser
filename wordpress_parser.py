@@ -6,11 +6,20 @@
 
 
 import zipfile
-from zipfile import ZipFile
 import os
 import re
-import glob
 import shutil
+
+import argparse
+
+parser=argparse.ArgumentParser(
+    description=''' ООО НТП "Криптософт". Cкрипт формирует из экспорта wordpress файлы для генерации в hugo''',
+    epilog=""" В результате работы скрипта будут сформированы два каталога 
+    posts  и  static. Переместите каталог posts  в каталог content, содержимое из static в каталог static
+    генератора сайтов HUGO.""")
+parser.add_argument('--d', type=str, default='wordpress', help='<каталог вебсервера>')
+args=parser.parse_args()
+dir_webserver = args.d
 
 # распаковываем архив
 with zipfile.ZipFile('hugo-export.zip', 'r') as zip_ref:
@@ -59,11 +68,11 @@ def work_on_files(directory, phrase):
     pattern_png_2 = r'(wp-image-.{4}).*?(/wp-content/uploads)'
     
     pattern_wp_im = r'/wp-content/uploads'
-    replacement_wp_im = r'](/wordpress-test/wp-content/uploads'
+    replacement_wp_im = r'](/' + re.escape(dir_webserver)+ r'/wp-content/uploads'
 
 # обработка изображения в заголовке
     pattern_feautured = r'featured_image: '
-    replacement_feautured = r'thumbnail:\n  src: "/wordpress-test'
+    replacement_feautured = r'thumbnail:\n  src: "/'+ re.escape(dir_webserver)
     pattern_png_3 = r'png'
     replacement_png_3 = r'png"\n  visibility:\n    -list'
 # удаление ссылок на внвнутренние ресурсы
@@ -157,6 +166,8 @@ delete_dir('hugo-export/sample-page')
 delete_dir('hugo-export/╨╕╨╖╨▒╤Ç╨░╨╜╨╜╨╛╨╡')
 delete_dir('hugo-export/╨┤╨╗╤Å-╤ç╨╡╨│╨╛-╨▓╤ü╨╡-╤ì╤é╨╛')
 del_config()
+
+print(dir_webserver)
 
 
 
